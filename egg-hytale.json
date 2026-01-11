@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": "https://raw.githubusercontent.com/NATroutter/egg-hytale/refs/heads/main/egg-hytale.json"
     },
-    "exported_at": "2026-01-11T21:41:54+00:00",
+    "exported_at": "2026-01-11T21:52:21+00:00",
     "name": "Hytale",
     "author": "contact@natroutter.fi",
     "uuid": "6594b287-2d7b-4249-bc93-4d40283c57e3",
@@ -52,7 +52,7 @@
         },
         {
             "name": "Allow OP",
-            "description": "Do you wish to allow op or not",
+            "description": "Do you wish to allow operators or not",
             "env_variable": "ALLOW_OP",
             "default_value": "1",
             "user_viewable": false,

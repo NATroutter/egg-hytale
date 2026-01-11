@@ -37,42 +37,16 @@ The following variables can be configured:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ASSET_PACK` | Asset pack to use | `Assets.zip` |
-| `ACCEPT_EARLY_PLUGINS` | Accept early-access plugins | `false` |
-| `ALLOW_OP` | Allow operator privileges | `true` |
-| `AUTH_MODE` | Authentication mode | `authenticated` |
+| `ASSET_PACK` | Assets pack (.zip) that are being send to player | `Assets.zip` |
+| `ACCEPT_EARLY_PLUGINS` | Acknowledge that loading early plugins is unsupported and may cause stability issues | `false` |
+| `ALLOW_OP` | Do you wish to allow operators or not | `true` |
+| `AUTH_MODE` | Authentication mode (authenticated or offline) | `authenticated` |
+| `AUTOMATIC_UPDATE` | Update the hytale server automatically | `true` |
+| `LEVERAGE_AHEAD_OF_TIME_CACHE` | The server ships with a pre-trained AOT cache (HytaleServer.aot) that improves boot times by skipping JIT warmup | `true` |
+| `DISABLE_SENTRY` | Disable Sentry during active plugin development. Hytale uses Sentry to track crashes. Disable it to avoid submitting your development errors | `true` |
 | `ENABLE_BACKUPS` | Enable automatic backups | `false` |
-| `BACKUP_DIRECTORY` | Backup directory path | `./backups` |
-| `BACKUP_FREQUENCY` | Backup frequency in minutes | `30` |
-| `SERVER_IP` | Server bind IP address | `0.0.0.0` |
-| `SERVER_PORT` | Server port | `5520` |
-
-
-## Scripts
-
-### install.sh
-
-Handles the initial installation of the Hytale server:
-- Installs required dependencies (curl, unzip)
-- Downloads the Hytale downloader
-- Extracts server files
-- Downloads the start script from GitHub
-- Sets executable permissions
-- Runs initial server setup
-
-### start.sh
-
-Manages server startup:
-- Verifies Hytale downloader exists
-- Sets executable permissions if needed
-- Runs the Hytale downloader
-- Starts the Hytale server with configured parameters
-
-## Usage
-
-Once installed, simply start the server from your Pelican Panel. The egg will handle:
-1. Running the Hytale downloader to fetch the latest server files
-2. Starting the server with your configured parameters
+| `BACKUP_DIRECTORY` | Directory where backups are saved | `/backup` |
+| `BACKUP_FREQUENCY` | Backup interval in minutes | `30` |
 
 ### First-Time Authentication
 
@@ -95,16 +69,6 @@ Authorization code: XXXXXXXX
 
 This authentication step is only required during initial setup. Subsequent server starts will not require re-authentication.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
@@ -125,9 +89,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Support
 
 If you encounter any issues or have questions:
-- Open an issue on GitHub
 - Check existing issues for solutions
-- Review the troubleshooting section above
+- Open an issue on GitHub
 
 ---
 
