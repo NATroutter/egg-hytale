@@ -7,7 +7,7 @@
 # Any manual changes you make will be overwritten on the next update.
 #
 # To customize server settings, use the egg configuration variables in your
-# Pelican panel instead.
+# Pelican or Pterodactyl panel instead.
 ################################################################################
 
 DOWNLOADER="./hytale-downloader-linux-amd64"
