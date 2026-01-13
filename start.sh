@@ -371,7 +371,7 @@ fi
 # Add max memory if set and greater than MEMORY_OVERHEAD
 if [ -n "${SERVER_MEMORY}" ] && [ "${SERVER_MEMORY}" -gt "${MEMORY_OVERHEAD}" ] 2>/dev/null; then
     JAVA_MEMORY=$((SERVER_MEMORY - MEMORY_OVERHEAD))
-    JAVA_CMD="${JAVA_CMD} -Xms${JAVA_MEMORY}M -Xmx${JAVA_MEMORY}M"
+    JAVA_CMD="${JAVA_CMD} -Xmx${JAVA_MEMORY}M"
 fi
 
 # Add JVM arguments if set
