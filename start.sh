@@ -71,39 +71,96 @@ check_cached_tokens() {
     return 1
 }
 
-# Function to load cached tokens
+# Function to load cached tokens (refresh_token + profile_uuid only)
 load_cached_tokens() {
-    ACCESS_TOKEN=$(jq -r '.access_token' "$AUTH_CACHE_FILE")
-    SESSION_TOKEN=$(jq -r '.session_token' "$AUTH_CACHE_FILE")
-    IDENTITY_TOKEN=$(jq -r '.identity_token' "$AUTH_CACHE_FILE")
+    REFRESH_TOKEN=$(jq -r '.refresh_token' "$AUTH_CACHE_FILE")
     PROFILE_UUID=$(jq -r '.profile_uuid' "$AUTH_CACHE_FILE")
 
-    # Validate all required tokens are present
-    if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" = "null" ] || \
-       [ -z "$SESSION_TOKEN" ] || [ "$SESSION_TOKEN" = "null" ] || \
-       [ -z "$IDENTITY_TOKEN" ] || [ "$IDENTITY_TOKEN" = "null" ] || \
+    # Validate required tokens are present
+    if [ -z "$REFRESH_TOKEN" ] || [ "$REFRESH_TOKEN" = "null" ] || \
        [ -z "$PROFILE_UUID" ] || [ "$PROFILE_UUID" = "null" ]; then
         echo "Error: Incomplete cached tokens, re-authenticating..."
         rm "$AUTH_CACHE_FILE"
         return 1
     fi
 
-    echo "✓ Loaded cached authentication tokens"
+    echo "✓ Loaded cached refresh token + profile UUID"
     return 0
 }
 
-# Function to save authentication tokens
+# Function to refresh access token using cached refresh token
+refresh_access_token() {
+    echo "Refreshing access token..."
+
+    TOKEN_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
+      -H "Content-Type: application/x-www-form-urlencoded" \
+      -d "client_id=hytale-server" \
+      -d "grant_type=refresh_token" \
+      -d "refresh_token=$REFRESH_TOKEN")
+
+    ERROR=$(echo "$TOKEN_RESPONSE" | jq -r '.error // empty')
+    if [ -n "$ERROR" ]; then
+        echo "Error: Failed to refresh access token: $ERROR"
+        return 1
+    fi
+
+    ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token')
+    NEW_REFRESH_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.refresh_token // empty')
+
+    if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" = "null" ]; then
+        echo "Error: No access token in refresh response"
+        return 1
+    fi
+
+    # Update refresh token if a new one was provided
+    if [ -n "$NEW_REFRESH_TOKEN" ] && [ "$NEW_REFRESH_TOKEN" != "null" ]; then
+        REFRESH_TOKEN="$NEW_REFRESH_TOKEN"
+    fi
+
+    echo "✓ Access token refreshed"
+    return 0
+}
+
+# Function to create a new game session
+create_game_session() {
+    echo "Creating game server session..."
+
+    SESSION_RESPONSE=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
+      -H "Authorization: Bearer $ACCESS_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d "{\"uuid\": \"${PROFILE_UUID}\"}")
+
+    # Validate JSON response
+    if ! echo "$SESSION_RESPONSE" | jq empty 2>/dev/null; then
+        echo "Error: Invalid JSON response from game session creation"
+        echo "Response: $SESSION_RESPONSE"
+        return 1
+    fi
+
+    # Extract session and identity tokens
+    SESSION_TOKEN=$(echo "$SESSION_RESPONSE" | jq -r '.sessionToken')
+    IDENTITY_TOKEN=$(echo "$SESSION_RESPONSE" | jq -r '.identityToken')
+
+    if [ -z "$SESSION_TOKEN" ] || [ "$SESSION_TOKEN" = "null" ]; then
+        echo "Error: Failed to create game server session"
+        echo "Response: $SESSION_RESPONSE"
+        return 1
+    fi
+
+    echo "✓ Game server session created successfully!"
+    return 0
+}
+
+# Function to save authentication tokens (refresh_token + profile_uuid only)
 save_auth_tokens() {
     cat > "$AUTH_CACHE_FILE" << EOF
 {
-  "access_token": "$ACCESS_TOKEN",
-  "session_token": "$SESSION_TOKEN",
-  "identity_token": "$IDENTITY_TOKEN",
+  "refresh_token": "$REFRESH_TOKEN",
   "profile_uuid": "$PROFILE_UUID",
   "timestamp": $(date +%s)
 }
 EOF
-    echo "✓ Authentication tokens cached for future use"
+    echo "✓ Refresh token cached for future use"
 }
 
 # Function to perform full authentication
@@ -163,6 +220,7 @@ perform_authentication() {
         else
             # Successfully authenticated
             ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token')
+            REFRESH_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.refresh_token')
             echo ""
             echo "✓ Authentication successful!"
             echo ""
@@ -207,36 +265,14 @@ perform_authentication() {
 
     echo ""
 
-    # Create game server session
-    echo "Creating game server session..."
-
-    SESSION_RESPONSE=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
-      -H "Authorization: Bearer $ACCESS_TOKEN" \
-      -H "Content-Type: application/json" \
-      -d "{\"uuid\": \"${PROFILE_UUID}\"}")
-
-    # Validate JSON response
-    if ! echo "$SESSION_RESPONSE" | jq empty 2>/dev/null; then
-        echo "Error: Invalid JSON response from game session creation"
-        echo "Response: $SESSION_RESPONSE"
-        exit 1
-    fi
-
-    # Extract session and identity tokens
-    SESSION_TOKEN=$(echo "$SESSION_RESPONSE" | jq -r '.sessionToken')
-    IDENTITY_TOKEN=$(echo "$SESSION_RESPONSE" | jq -r '.identityToken')
-
-    if [ -z "$SESSION_TOKEN" ] || [ "$SESSION_TOKEN" = "null" ]; then
-        echo "Error: Failed to create game server session"
-        echo "Response: $SESSION_RESPONSE"
-        exit 1
-    fi
-
-    echo "✓ Game server session created successfully!"
-    echo ""
-
-    # Save tokens for future use
+    # Save refresh token + profile for future use
     save_auth_tokens
+
+    # Create game server session
+    if ! create_game_session; then
+        exit 1
+    fi
+    echo ""
 }
 
 # Check if the downloader exists
@@ -303,7 +339,20 @@ fi
 
 # Check for cached authentication tokens
 if check_cached_tokens && load_cached_tokens; then
-    echo "Using cached authentication - skipping login prompt"
+    echo "Using cached authentication..."
+    if refresh_access_token; then
+        # Update cache in case refresh token rotated
+        save_auth_tokens
+        # Create fresh game session
+        if ! create_game_session; then
+            exit 1
+        fi
+    else
+        # Refresh failed, need full re-auth
+        echo "Refresh token expired, re-authenticating..."
+        rm -f "$AUTH_CACHE_FILE"
+        perform_authentication
+    fi
 else
     # Perform full authentication if no valid cache exists
     perform_authentication
