@@ -12,6 +12,13 @@
 
 echo "Starting Hytale server..."
 
+# Start hibernation monitor in background if enabled
+if [ "${ENABLE_HIBERNATION}" = "1" ] && [ -f "/usr/local/bin/hibernation-monitor.sh" ]; then
+    echo "Starting hibernation monitor..."
+    nohup /bin/bash /usr/local/bin/hibernation-monitor.sh > /dev/null 2>&1 &
+    echo "Hibernation enabled: Server will hibernate after ${HIBERNATION_TIMEOUT:-300}s of inactivity"
+fi
+
 # Build the Java command
 JAVA_CMD="java"
 

@@ -12,7 +12,7 @@ USER root
 COPY --from=ghcr.io/parkervcp/yolks:java_25 --chmod=755 /entrypoint.sh /entrypoint.sh
 
 # Install dependencies
-RUN apt update -y && apt install -y unzip jq curl && rm -rf /var/lib/apt/lists/*
+RUN apt update -y && apt install -y unzip jq curl net-tools && rm -rf /var/lib/apt/lists/*
 
 # Copy entry.sh as root-owned (so container user can't modify it)
 COPY --chmod=755 ./entry.sh /entry.sh
@@ -21,6 +21,10 @@ RUN sed -i 's/\r$//' /entry.sh
 # Copy start.sh to /usr/local/bin (protected location, won't be overridden by volume mounts)
 COPY --chmod=755 ./start.sh /usr/local/bin/start.sh
 RUN sed -i 's/\r$//' /usr/local/bin/start.sh
+
+# Copy hibernation monitor script to /usr/local/bin
+COPY --chmod=755 ./hibernation-monitor.sh /usr/local/bin/hibernation-monitor.sh
+RUN sed -i 's/\r$//' /usr/local/bin/hibernation-monitor.sh
 
 # Switch to container user ONLY for runtime
 USER container
