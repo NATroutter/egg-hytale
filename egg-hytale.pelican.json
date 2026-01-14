@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": "https://cdn.nat.gg/egg/egg-hytale.pelican.json"
     },
-    "exported_at": "2026-01-14T16:02:41+00:00",
+    "exported_at": "2026-01-14T17:35:20+00:00",
     "name": "Hytale",
     "author": "contact@natroutter.fi",
     "uuid": "6594b287-2d7b-4249-bc93-4d40283c57e3",
@@ -307,6 +307,36 @@
                 "boolean"
             ],
             "sort": 19
+        },
+        {
+            "name": "Enable Hibernation",
+            "description": "Enable automatic server hibernation when no players are online. The server will suspend the Java process to save RAM and CPU resources, then automatically wake up when a player connects.",
+            "env_variable": "ENABLE_HIBERNATION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Hibernation Timeout",
+            "description": "Time in seconds to wait with no players before hibernating the server. Recommended: 300 (5 minutes) for most servers.",
+            "env_variable": "HIBERNATION_TIMEOUT",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:60",
+            "field_type": "text"
+        },
+        {
+            "name": "Hibernation Check Interval",
+            "description": "How often (in seconds) to check for player activity. Lower values provide faster hibernation/wake responses but use slightly more CPU. Recommended: 30 seconds.",
+            "env_variable": "HIBERNATION_CHECK_INTERVAL",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:10|max:300",
+            "field_type": "text"
         }
     ]
 }

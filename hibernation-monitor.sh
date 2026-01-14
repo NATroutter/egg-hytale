@@ -110,7 +110,7 @@ hibernate_server() {
         return 1
     fi
     
-    log "🌙 Hibernating server (PID: $pid) - No players for ${IDLE_TIMEOUT}s"
+    log "Hibernating server (PID: $pid) - No players for ${IDLE_TIMEOUT}s"
     
     # Suspend the Java process
     kill -STOP "$pid" 2>/dev/null
@@ -139,7 +139,7 @@ wake_server() {
         return 1
     fi
     
-    log "☀️ Waking up server (PID: $pid) - Activity detected"
+    log "Waking up server (PID: $pid) - Activity detected"
     
     # Resume the Java process
     kill -CONT "$pid" 2>/dev/null
@@ -206,7 +206,7 @@ main() {
                     hibernate_server
                 else
                     local remaining=$((IDLE_TIMEOUT - idle_time))
-                    log "📊 No players online - hibernating in ${remaining}s"
+                    log "No players online - hibernating in ${remaining}s"
                 fi
             fi
         fi
