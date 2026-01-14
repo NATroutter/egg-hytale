@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": "https://cdn.nat.gg/egg/egg-hytale.pelican.json"
     },
-    "exported_at": "2026-01-14T00:44:52+00:00",
+    "exported_at": "2026-01-14T09:33:33+00:00",
     "name": "Hytale",
     "author": "contact@natroutter.fi",
     "uuid": "6594b287-2d7b-4249-bc93-4d40283c57e3",
@@ -181,6 +181,20 @@
                 "boolean"
             ],
             "sort": 8
+        },
+        {
+            "name": "Maximum Backups",
+            "description": "The maximum number of backups to keep. When this limit is reached, the oldest backups will be deleted automatically.",
+            "env_variable": "MAXIMUM_BACKUPS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "integer",
+                "min:1",
+                "required"
+            ],
+            "sort": 14
         },
         {
             "name": "Memory overhead",

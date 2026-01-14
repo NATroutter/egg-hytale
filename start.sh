@@ -57,7 +57,7 @@ fi
 
 # Add backup parameters if enabled
 if [ "${ENABLE_BACKUPS}" = "1" ]; then
-    JAVA_CMD="${JAVA_CMD} --backup --backup-dir ./backup --backup-frequency ${BACKUP_FREQUENCY}"
+    JAVA_CMD="${JAVA_CMD} --backup --backup-dir ./backup --backup-frequency ${BACKUP_FREQUENCY} --backup-max-count ${MAXIMUM_BACKUPS}"
 fi
 
 # Add session tokens and owner UUID

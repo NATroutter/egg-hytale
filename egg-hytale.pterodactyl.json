@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": "https:\/\/raw.githubusercontent.com\/NATroutter\/egg-hytale\/refs\/heads\/main\/egg-hytale.pterodactyl.json"
     },
-    "exported_at": "2026-01-14T02:45:29+02:00",
+    "exported_at": "2026-01-14T11:33:06+02:00",
     "name": "Hytale",
     "author": "contact@natroutter.fi",
     "description": "Hytale is a block-based sandbox game that blends creative building with RPG adventure. Explore procedurally generated worlds filled with unique biomes, dungeons, and creatures. Build anything from simple homes to grand castles, craft items, and battle monsters. Create custom content with built-in modding tools, host your own servers, and shape the experience with plugins and mods. Play solo or with friends in a world designed for both creation and exploration.\r\n\r\nCredits:\r\n- Made by NATroutter\r\n- https:\/\/natroutter.fi\r\n- https:\/\/github.com\/NATroutter",
@@ -158,6 +158,16 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Maximum Backups",
+            "description": "The maximum number of backups to keep. When this limit is reached, the oldest backups will be deleted automatically.",
+            "env_variable": "MAXIMUM_BACKUPS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
             "field_type": "text"
         }
     ]

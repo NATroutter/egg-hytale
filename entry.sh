@@ -25,7 +25,7 @@ extract_server_files() {
     SERVER_ZIP="server.zip"
 
     if [ -f "$SERVER_ZIP" ]; then
-        echo "Found server archive: $SERVER_ZIP"
+        echo "✓ Found server archive: $SERVER_ZIP"
 
         # Extract to current directory
         unzip -o "$SERVER_ZIP"
@@ -35,7 +35,7 @@ extract_server_files() {
             exit 1
         fi
 
-        echo "Extraction completed successfully."
+        echo "✓ Extraction completed successfully."
 
         # Move contents from Server folder to current directory
         if [ -d "Server" ]; then
@@ -185,7 +185,7 @@ perform_authentication() {
     POLL_INTERVAL=$(echo "$AUTH_RESPONSE" | jq -r '.interval')
 
     # Display authentication banner
-    echo ""
+    echo " "
     echo "╔═════════════════════════════════════════════════════════════════════════════╗"
     echo "║                       HYTALE SERVER AUTHENTICATION REQUIRED                 ║"
     echo "╠═════════════════════════════════════════════════════════════════════════════╣"
@@ -201,7 +201,7 @@ perform_authentication() {
     echo "║  Waiting for authentication...                                              ║"
     echo "║                                                                             ║"
     echo "╚═════════════════════════════════════════════════════════════════════════════╝"
-    echo ""
+    echo " "
 
     # Step 2: Poll for access token
     ACCESS_TOKEN=""
@@ -221,7 +221,7 @@ perform_authentication() {
             echo "Still waiting for authentication..."
             continue
         elif [ -n "$ERROR" ]; then
-            echo "Authentication error: $ERROR"
+            echo "⨯ Authentication error: $ERROR"
             exit 1
         else
             # Successfully authenticated
@@ -305,20 +305,42 @@ INITIAL_SETUP=0
 if [ ! -f ".hytale-downloader-credentials.json" ]; then
     INITIAL_SETUP=1
     echo "Credentials file not found, running initial setup..."
-    echo "Starting Hytale downloader..."
+	echo "Downloading server files..."
+
     $DOWNLOADER -check-update
-    $DOWNLOADER -patchline $PATCHLINE -download-path server.zip
+
+    echo " "
+    echo "════════════════════════════════════════════════════════════════"
+    echo "  NOTE: You must own Hytale with the account you authenticate"
+    echo "════════════════════════════════════════════════════════════════"
+    echo " "
+
+    if ! $DOWNLOADER -patchline $PATCHLINE -download-path server.zip; then
+        echo ""
+        echo "Error: Failed to download Hytale server files."
+        echo "This may indicate:"
+        echo "  - You haven't purchased Hytale"
+        echo "  - Authentication credentials are invalid or expired"
+        echo ""
+		echo "Removing invalid credential file..."
+		rm -f .hytale-downloader-credentials.json
+        exit 1
+    fi
+
     extract_server_files
 
     # Save version info after initial setup
-    DOWNLOADER_VERSION=$($DOWNLOADER -print-version)
-    echo "$DOWNLOADER_VERSION" > version.txt
-    echo "Version info saved for later use!"
+    DOWNLOADER_VERSION=$($DOWNLOADER -print-version 2>&1)
+
+    if [ $? -eq 0 ] && [ -n "$DOWNLOADER_VERSION" ]; then
+        echo "$DOWNLOADER_VERSION" > version.txt
+        echo "✓ Saved version info to version.txt!"
+    fi
 fi
 
 # Run automatic update if enabled
 if [ "${AUTOMATIC_UPDATE}" = "1" ] && [ "${INITIAL_SETUP}" = "0" ]; then
-    echo "Starting Hytale downloader..."
+    echo "Checking for updates..."
 
     # Read local version from file
     if [ -f "version.txt" ]; then
@@ -329,24 +351,31 @@ if [ "${AUTOMATIC_UPDATE}" = "1" ] && [ "${INITIAL_SETUP}" = "0" ]; then
     fi
 
     # Get remote/downloader version
-    DOWNLOADER_VERSION=$($DOWNLOADER -print-version)
+    DOWNLOADER_VERSION=$($DOWNLOADER -print-version 2>&1)
 
-    echo "Local version: $LOCAL_VERSION"
-    echo "Downloader version: $DOWNLOADER_VERSION"
-
-    # Compare versions
-    if [ "$LOCAL_VERSION" != "$DOWNLOADER_VERSION" ]; then
-        echo "Version mismatch, running update..."
-
-        $DOWNLOADER -check-update
-        $DOWNLOADER -patchline $PATCHLINE -download-path server.zip
-        extract_server_files
-
-        # Update version.txt after successful update
-        echo "$DOWNLOADER_VERSION" > version.txt
-		echo "Version info saved for later use!"
+    # Check if version command failed
+    if [ $? -ne 0 ] || [ -z "$DOWNLOADER_VERSION" ]; then
+        echo "Error: Failed to get downloader version. This may indicate authentication issues."
+        echo "Output: $DOWNLOADER_VERSION"
+		exit 1
     else
-        echo "Versions match, skipping update"
+        echo "Local version: $LOCAL_VERSION"
+        echo "Downloader version: $DOWNLOADER_VERSION"
+
+        # Compare versions
+        if [ "$LOCAL_VERSION" != "$DOWNLOADER_VERSION" ]; then
+            echo "⨯ Version mismatch, running update..."
+
+            $DOWNLOADER -check-update
+            $DOWNLOADER -patchline $PATCHLINE -download-path server.zip
+            extract_server_files
+
+            # Update version.txt after successful update
+            echo "$DOWNLOADER_VERSION" > version.txt
+            echo "✓ Saved version info to version.txt!"
+        else
+            echo "⨯ Versions match, skipping update"
+        fi
     fi
 fi
 
