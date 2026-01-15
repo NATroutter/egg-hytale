@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": "https://cdn.nat.gg/egg/egg-hytale.pelican.json"
     },
-    "exported_at": "2026-01-14T21:03:45+00:00",
+    "exported_at": "2026-01-15T10:29:08+00:00",
     "name": "Hytale",
     "author": "contact@natroutter.fi",
     "uuid": "6594b287-2d7b-4249-bc93-4d40283c57e3",
@@ -157,6 +157,18 @@
             "sort": 6
         },
         {
+            "name": "Enable Source Query Support",
+            "description": "Adds the Source Query integration so your server can answer A2S queries such as server name, player count, and status.",
+            "env_variable": "ENABLE_SOURCE_QUERY_SUPPORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 22
+        },
+        {
             "name": "Event Debug",
             "description": "Enables detailed logging of server events for debugging purposes. Useful for troubleshooting issues or tracking event behavior, but may produce a lot of output.",
             "env_variable": "EVENT_DEBUG",
@@ -271,6 +283,20 @@
                 "required"
             ],
             "sort": 12
+        },
+        {
+            "name": "Source Query Listening Port",
+            "description": "Specifies the port used by the Source Query service to handle A2S requests. This must be separate from the main game port. By default, it is set to the game port plus one.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "5021",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "integer",
+                "between:1,65535",
+                "required"
+            ],
+            "sort": 23
         },
         {
             "name": "Validate Assets",

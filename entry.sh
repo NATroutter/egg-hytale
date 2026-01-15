@@ -432,6 +432,32 @@ if [ ! -f "HytaleServer.jar" ]; then
     exit 1
 fi
 
+# Download the latest hytale-sourcequery plugin if enabled
+if [ "${ENABLE_SOURCE_QUERY_SUPPORT}" = "1" ]; then
+    echo "Source Query support enabled, checking for plugin..."
+
+    # Create mods directory if it doesn't exist
+    if [ ! -d "mods" ]; then
+        echo "Creating mods directory..."
+        mkdir -p mods
+    fi
+
+    echo "Downloading latest hytale-sourcequery plugin..."
+    LATEST_URL=$(curl -sSL https://api.github.com/repos/physgun-com/hytale-sourcequery/releases/latest | jq -r '.assets[0].browser_download_url // empty')
+
+    if [ -n "$LATEST_URL" ]; then
+        curl -sSL -o mods/hytale-sourcequery.jar "$LATEST_URL"
+
+        if [ $? -eq 0 ]; then
+            echo "✓ Successfully downloaded hytale-sourcequery plugin to mods folder"
+        else
+            echo "⨯ Failed to download hytale-sourcequery plugin"
+        fi
+    else
+        echo "⨯ Could not find hytale-sourcequery plugin download URL"
+    fi
+fi
+
 # Check for cached authentication tokens
 if check_cached_tokens && load_cached_tokens; then
     echo "Using cached authentication..."
