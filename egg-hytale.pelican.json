@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": "https://cdn.nat.gg/egg/egg-hytale.pelican.json"
     },
-    "exported_at": "2026-01-14T17:35:20+00:00",
+    "exported_at": "2026-01-14T21:03:45+00:00",
     "name": "Hytale",
     "author": "contact@natroutter.fi",
     "uuid": "6594b287-2d7b-4249-bc93-4d40283c57e3",
@@ -21,7 +21,8 @@
         "Hytale": "ghcr.io/natroutter/egg-hytale:latest"
     },
     "file_denylist": [
-        "hytale-downloader-linux-amd64"
+        "hytale-downloader-linux-amd64",
+        "hytale-downloader-linux-arm64"
     ],
     "startup_commands": {
         "Default": "./start.sh"
@@ -34,7 +35,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\nDOWNLOAD_URL=\"https://downloader.hytale.com/hytale-downloader.zip\"\nDOWNLOAD_FILE=\"hytale-downloader.zip\"\n\napt update\napt install -y curl unzip jq\n\ncd /mnt/server\n\n# Downloads and extracts the Hytale downloader\necho \"Starting Hytale downloader installation...\"\n\n# Download the file\necho \"Downloading hytale-downloader.zip...\"\ncurl -L -o \"${DOWNLOAD_FILE}\" \"${DOWNLOAD_URL}\"\n\nif [ $? -ne 0 ]; then\n    echo \"Error: Failed to download ${DOWNLOAD_URL}\"\n    exit 1\nfi\n\necho \"Download completed successfully.\"\n\n# Extract the zip file\necho \"Extracting ${DOWNLOAD_FILE}...\"\nunzip -o \"${DOWNLOAD_FILE}\"\n\nif [ $? -ne 0 ]; then\n    echo \"Error: Failed to extract ${DOWNLOAD_FILE}\"\n    exit 1\nfi\n\necho \"Extraction completed successfully.\"\n\n# Remove the unnessasery file\necho \"Cleaning up...\"\nrm \"${DOWNLOAD_FILE}\"\nrm QUICKSTART.md\nrm hytale-downloader-windows-amd64.exe\n\n#Creating the empty version file for version checks\nif [ ! -f \"/mnt/server/version.txt\" ]; then\n    echo \"Creating version check file...\"\n    touch /mnt/server/version.txt\n    chmod 666 /mnt/server/version.txt\nelse\n    echo \"Version check file already exists!\"\nfi\n\n#Creating the empty version file for version checks\nif [ ! -f \"/mnt/server/.hytale-auth-tokens.json\" ]; then\n    echo \"Creating auth cache file...\"\n    touch /mnt/server/.hytale-auth-tokens.json\n    chmod 666 /mnt/server/.hytale-auth-tokens.json\nelse\n    echo \"Auth cache already exists!\"\nfi\n\necho \"Setting executable permissions...\"\nchmod +x ./hytale-downloader-linux-amd64\n\necho \"Installation complete!\"",
+            "script": "#!/bin/bash\nset -e\n\nDOWNLOAD_URL=\"https://downloader.hytale.com/hytale-downloader.zip\"\nDOWNLOAD_FILE=\"hytale-downloader.zip\"\n\nARCH=\"$(uname -m)\"\n\necho \"Platform: ${ARCH}\"\necho \"Installing base dependencies...\"\n\napt update\napt install -y curl unzip jq\n\n# ARM-only setup for running amd64 downloader\nif [ \"${ARCH}\" = \"aarch64\" ]; then\n    echo \"ARM64 detected, enabling amd64 emulation with QEMU...\"\n\n    apt install -y qemu-user-static\n\n    dpkg --add-architecture amd64 || true\n    apt update || true\n    apt install -y libc6:amd64 || true\nfi\n\ncd /mnt/server\n\necho \"Starting Hytale downloader installation...\"\necho \"Downloading hytale-downloader.zip...\"\n\ncurl -L -o \"${DOWNLOAD_FILE}\" \"${DOWNLOAD_URL}\"\nif [ $? -ne 0 ]; then\n    echo \"Error: Failed to download ${DOWNLOAD_URL}\"\n    exit 1\nfi\n\necho \"Extracting ${DOWNLOAD_FILE}...\"\nunzip -o \"${DOWNLOAD_FILE}\"\nif [ $? -ne 0 ]; then\n    echo \"Error: Failed to extract ${DOWNLOAD_FILE}\"\n    exit 1\nfi\n\necho \"Cleaning up...\"\nrm -f \"${DOWNLOAD_FILE}\" QUICKSTART.md hytale-downloader-windows-amd64.exe\n\nchmod +x ./hytale-downloader-linux-amd64\n\n# ARM wrapper setup\nif [ \"${ARCH}\" = \"aarch64\" ]; then\n    echo \"Setting up QEMU wrapper for amd64 downloader...\"\n\n    cp /usr/bin/qemu-x86_64-static ./qemu-x86_64-static\n\n    cat > ./hytale-downloader-linux-arm64 << 'EOF'\n#!/bin/bash\nset -e\n\nREAL_BIN=\"/home/container/hytale-downloader-linux-amd64\"\nQEMU_LOCAL=\"/home/container/qemu-x86_64-static\"\n\nif [ -x \"$QEMU_LOCAL\" ]; then\n    exec \"$QEMU_LOCAL\" \"$REAL_BIN\" \"$@\"\nelse\n    exec /usr/bin/qemu-x86_64-static \"$REAL_BIN\" \"$@\"\nfi\nEOF\n\n    chmod +x ./hytale-downloader-linux-arm64\nfi\n\n# Create version file\nif [ ! -f \"/mnt/server/version.txt\" ]; then\n    echo \"Creating version check file...\"\n    touch /mnt/server/version.txt\n    chmod 666 /mnt/server/version.txt\nfi\n\n# Create auth cache file\nif [ ! -f \"/mnt/server/.hytale-auth-tokens.json\" ]; then\n    echo \"Creating auth cache file...\"\n    touch /mnt/server/.hytale-auth-tokens.json\n    chmod 666 /mnt/server/.hytale-auth-tokens.json\nfi\n\necho \"Installation complete!\"",
             "container": "ghcr.io/pelican-eggs/installers:debian",
             "entrypoint": "bash"
         }

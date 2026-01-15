@@ -16,8 +16,27 @@
 
 DOWNLOAD_URL="https://downloader.hytale.com/hytale-downloader.zip"
 DOWNLOAD_FILE="hytale-downloader.zip"
-DOWNLOADER="./hytale-downloader-linux-amd64"
 AUTH_CACHE_FILE=".hytale-auth-tokens.json"
+DOWNLOADER="./hytale-downloader-linux-amd64"
+USE_DOWNLOADER=1;
+
+# Detect architecture and set appropriate downloader binary
+ARCH=$(uname -m)
+echo "Platform: $ARCH"
+
+case "$ARCH" in
+    x86_64)
+        DOWNLOADER="./hytale-downloader-linux-amd64"
+        ;;
+    aarch64|arm64)
+        DOWNLOADER="./hytale-downloader-linux-arm64"
+        ;;
+    *)
+        echo "Error: Unsupported architecture: $ARCH"
+        echo "Supported architectures: x86_64 (amd64), aarch64/arm64"
+        exit 1
+        ;;
+esac
 
 # Function to extract downloaded server files
 extract_server_files() {
@@ -310,60 +329,63 @@ else
 fi
 chmod -R 755 /home/container/backup
 
-# Check if the downloader exists
-if [ ! -f "$DOWNLOADER" ]; then
-    echo "Error: Hytale downloader not found!"
-    echo "Please run the installation script first."
-    exit 1
-fi
-
-# Check if the downloader is executable
-if [ ! -x "$DOWNLOADER" ]; then
-    echo "Setting executable permissions..."
-    chmod +x "$DOWNLOADER"
-fi
-
-INITIAL_SETUP=0
-
-# Check if credentials file exists, if not run the updater
-if [ ! -f ".hytale-downloader-credentials.json" ]; then
-    INITIAL_SETUP=1
-    echo "Credentials file not found, running initial setup..."
-	echo "Downloading server files..."
-
-    $DOWNLOADER -check-update
-
-    echo " "
-    echo "════════════════════════════════════════════════════════════════"
-    echo "  NOTE: You must have purchased Hytale on the account you are using to authenticate."
-    echo "════════════════════════════════════════════════════════════════"
-    echo " "
-
-    if ! $DOWNLOADER -patchline $PATCHLINE -download-path server.zip; then
-        echo ""
-        echo "Error: Failed to download Hytale server files."
-        echo "This may indicate:"
-        echo "  - You haven't purchased Hytale"
-        echo "  - Authentication credentials are invalid or expired"
-        echo ""
-		echo "Removing invalid credential file..."
-		rm -f .hytale-downloader-credentials.json
+# Only proceed with downloader if on x86_64 architecture
+if [ "$USE_DOWNLOADER" = "1" ]; then
+    # Check if the downloader exists
+    if [ ! -f "$DOWNLOADER" ]; then
+        echo "Error: Hytale downloader not found!"
+        echo "Please run the installation script first."
         exit 1
     fi
 
-    extract_server_files
+    # Check if the downloader is executable
+    if [ ! -x "$DOWNLOADER" ]; then
+        echo "Setting executable permissions..."
+        chmod +x "$DOWNLOADER"
+    fi
 
-    # Save version info after initial setup
-    DOWNLOADER_VERSION=$($DOWNLOADER -print-version 2>&1)
+    INITIAL_SETUP=0
 
-    if [ $? -eq 0 ] && [ -n "$DOWNLOADER_VERSION" ]; then
-        echo "$DOWNLOADER_VERSION" > version.txt
-        echo "✓ Saved version info to version.txt!"
+    # Check if credentials file exists, if not run the updater
+    if [ ! -f ".hytale-downloader-credentials.json" ]; then
+        INITIAL_SETUP=1
+        echo "Credentials file not found, running initial setup..."
+        echo "Downloading server files..."
+
+        $DOWNLOADER -check-update
+
+        echo " "
+        echo "════════════════════════════════════════════════════════════════"
+        echo "  NOTE: You must have purchased Hytale on the account you are using to authenticate."
+        echo "════════════════════════════════════════════════════════════════"
+        echo " "
+
+        if ! $DOWNLOADER -patchline $PATCHLINE -download-path server.zip; then
+            echo ""
+            echo "Error: Failed to download Hytale server files."
+            echo "This may indicate:"
+            echo "  - You haven't purchased Hytale"
+            echo "  - Authentication credentials are invalid or expired"
+            echo ""
+            echo "Removing invalid credential file..."
+            rm -f .hytale-downloader-credentials.json
+            exit 1
+        fi
+
+        extract_server_files
+
+        # Save version info after initial setup
+        DOWNLOADER_VERSION=$($DOWNLOADER -print-version 2>&1)
+
+        if [ $? -eq 0 ] && [ -n "$DOWNLOADER_VERSION" ]; then
+            echo "$DOWNLOADER_VERSION" > version.txt
+            echo "✓ Saved version info to version.txt!"
+        fi
     fi
 fi
 
-# Run automatic update if enabled
-if [ "${AUTOMATIC_UPDATE}" = "1" ] && [ "${INITIAL_SETUP}" = "0" ]; then
+# Run automatic update if enabled (only on x86_64)
+if [ "$USE_DOWNLOADER" = "1" ] && [ "${AUTOMATIC_UPDATE}" = "1" ] && [ "${INITIAL_SETUP}" = "0" ]; then
     echo "Checking for updates..."
 
     # Read local version from file
@@ -381,7 +403,7 @@ if [ "${AUTOMATIC_UPDATE}" = "1" ] && [ "${INITIAL_SETUP}" = "0" ]; then
     if [ $? -ne 0 ] || [ -z "$DOWNLOADER_VERSION" ]; then
         echo "Error: Failed to get downloader version. This may indicate authentication issues."
         echo "Output: $DOWNLOADER_VERSION"
-		exit 1
+        exit 1
     else
         echo "Local version: $LOCAL_VERSION"
         echo "Downloader version: $DOWNLOADER_VERSION"
