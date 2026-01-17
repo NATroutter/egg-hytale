@@ -4,7 +4,7 @@
         "version": "PLCN_v3",
         "update_url": "https://cdn.nat.gg/egg/egg-hytale.pelican.json"
     },
-    "exported_at": "2026-01-15T15:19:50+00:00",
+    "exported_at": "2026-01-17T12:47:20+00:00",
     "name": "Hytale",
     "author": "contact@natroutter.fi",
     "uuid": "6594b287-2d7b-4249-bc93-4d40283c57e3",
@@ -75,8 +75,7 @@
             "user_editable": true,
             "rules": [
                 "string",
-                "required",
-                "regex:/^\\s*([\\w._-]+)\\.zip\\s*$/"
+                "required"
             ],
             "sort": 3
         },
@@ -222,7 +221,7 @@
             "name": "JVM Arguments",
             "description": "Additional Java Virtual Machine arguments for advanced configuration.\n\nWarning: Improper JVM settings can lead to poor performance, crashes, or failure to start. Only modify if you understand what these parameters do.",
             "env_variable": "JVM_ARGS",
-            "default_value": "-XX:+UseG1GC -XX:+UseCompactObjectHeaders -XX:+UseStringDeduplication",
+            "default_value": "-XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:-UseCompactObjectHeaders -XX:+UseG1GC -XX:+UseStringDeduplication -Xlog:aot",
             "user_viewable": true,
             "user_editable": true,
             "rules": [
@@ -324,22 +323,8 @@
             "sort": 12
         },
         {
-            "name": "Source Query Listening Port",
-            "description": "Specifies the port used by the Source Query service to handle A2S requests. This must be separate from the main game port. By default, it is set to the game port plus one.",
-            "env_variable": "QUERY_PORT",
-            "default_value": "5021",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": [
-                "integer",
-                "between:1,65535",
-                "required"
-            ],
-            "sort": 23
-        },
-        {
-            "name": "Validate Assets",
-            "description": "Causes the server to exit with an error code if assets are invalid. Leave empty to skip validation.",
+            "name": "Require valid assets",
+            "description": "Causes the server to exit with an error code if assets are invalid.",
             "env_variable": "VALIDATE_ASSETS",
             "default_value": "0",
             "user_viewable": true,
@@ -350,7 +335,7 @@
             "sort": 21
         },
         {
-            "name": "Validate prefabs",
+            "name": "Require valid prefabs",
             "description": "Forces the server to stop and exit with an error if any specified prefab types are invalid. Provide a comma-separated list of prefab categories (e.g. PHYSICS,BLOCKS,BLOCK_STATES,ENTITIES,BLOCK_FILLER) to check. Leave empty to skip validation.",
             "env_variable": "VALIDATE_PREFABS",
             "default_value": "",
@@ -363,8 +348,8 @@
             "sort": 20
         },
         {
-            "name": "Validate world generation",
-            "description": "Causes the server to exit with an error code if world gen is invalid. Leave empty to skip validation.",
+            "name": "Require valid world generation",
+            "description": "Causes the server to exit with an error code if world gen is invalid.",
             "env_variable": "VALIDATE_WORLD_GENERATION",
             "default_value": "0",
             "user_viewable": true,
@@ -373,6 +358,20 @@
                 "boolean"
             ],
             "sort": 19
+        },
+        {
+            "name": "Source Query Listening Port",
+            "description": "Specifies the port used by the Source Query service to handle A2S requests. This must be separate from the main game port. By default, it is set to the game port plus one.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "5021",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "integer",
+                "between:1,65535",
+                "required"
+            ],
+            "sort": 23
         }
     ]
 }

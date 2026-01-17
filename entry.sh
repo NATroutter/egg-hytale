@@ -527,7 +527,7 @@ export IDENTITY_TOKEN
 
 # Enforce file and folder permissions if enabled
 if [ "$ENFORCE_PERMISSIONS" = "1" ]; then
-    echo "Enforcing permissions..."
+    echo "Enforcing permissions... This might take a while. Please be patient."
     # Set all directories to 755
     find . -type d -exec chmod 755 {} \;
     # Set all files to 644, excluding executables that need to remain executable

@@ -20,11 +20,15 @@ if [ "${LEVERAGE_AHEAD_OF_TIME_CACHE}" = "1" ]; then
     JAVA_CMD="${JAVA_CMD} -XX:AOTCache=HytaleServer.aot"
 fi
 
-# Add max memory if set and greater than MEMORY_OVERHEAD
+# Add max memory (always set)
+MEMORY_OVERHEAD=${MEMORY_OVERHEAD:-0}
 if [ -n "${SERVER_MEMORY}" ] && [ "${SERVER_MEMORY}" -gt "${MEMORY_OVERHEAD}" ] 2>/dev/null; then
     JAVA_MEMORY=$((SERVER_MEMORY - MEMORY_OVERHEAD))
-    JAVA_CMD="${JAVA_CMD} -Xmx${JAVA_MEMORY}M"
+else
+    JAVA_MEMORY=${SERVER_MEMORY:-1024}
 fi
+
+JAVA_CMD="${JAVA_CMD} -Xmx${JAVA_MEMORY}M"
 
 # Add JVM arguments if set
 if [ -n "${JVM_ARGS}" ]; then
@@ -34,7 +38,8 @@ fi
 JAVA_CMD="${JAVA_CMD} -jar HytaleServer.jar"
 
 # Add assets parameter if set and ends with .zip
-if [ -n "${ASSET_PACK}" ] && [[ "${ASSET_PACK}" == *.zip ]]; then
+echo "Using asset pack at: $ASSET_PACK"
+if [ -n "${ASSET_PACK}" ]; then
     JAVA_CMD="${JAVA_CMD} --assets ${ASSET_PACK}"
 fi
 
