@@ -59,11 +59,6 @@ if [ -n "$OVERRIDE_SESSION_TOKEN" ] && [ -n "$OVERRIDE_IDENTITY_TOKEN" ]; then
     SESSION_TOKEN="$OVERRIDE_SESSION_TOKEN"
     IDENTITY_TOKEN="$OVERRIDE_IDENTITY_TOKEN"
 else
-    # Default to persistent authentication if not specified
-    if [ -z "$USE_PERSISTENT_AUTHENTICATION" ]; then
-        USE_PERSISTENT_AUTHENTICATION="ENABLED"
-    fi
-
     if [ "$USE_PERSISTENT_AUTHENTICATION" = "ENABLED" ]; then
         # Standard mode: perform authentication
         if check_cached_tokens && load_cached_tokens; then

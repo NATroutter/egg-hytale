@@ -302,9 +302,9 @@
         },
         {
             "name": "Use Persistent Authentication",
-            "description": "Enabling this option activates the egg's built-in authentication and credentials storage system for the game. If disabled, it is assumed that you will use the game's own authentication system.",
+            "description": "(Not Recommended - Unencrypted) Enabling this option activates the egg's built-in authentication and credentials storage system for the game. If disabled, it is assumed that you will use the game's own authentication system.",
             "env_variable": "USE_PERSISTENT_AUTHENTICATION",
-            "default_value": "ENABLED",
+            "default_value": "DISABLED",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|string|in:ENABLED,DISABLED",
