@@ -104,4 +104,15 @@ JAVA_CMD="${JAVA_CMD} --bind 0.0.0.0:${SERVER_PORT}"
 
 # Execute the command
 #echo "$JAVA_CMD"
-eval $JAVA_CMD
+if [ "${TRIM_LOG_SPACES}" = "1" ]; then
+    set -o pipefail
+    # Reduce excessive padding before component tags like [NPC] without changing the message body.
+    eval "$JAVA_CMD" 2>&1 | sed -u -E \
+        -e 's/\] {2,}\[/] [/' \
+        -e 's/^(\[[0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) {2,}/\1 /'
+    EXIT_CODE=${PIPESTATUS[0]}
+    set +o pipefail
+    exit $EXIT_CODE
+else
+    eval $JAVA_CMD
+fi

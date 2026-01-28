@@ -256,6 +256,18 @@
             "sort": 18
         },
         {
+            "name": "Trim Log Padding",
+            "description": "Collapses excessive spacing in log lines (for example between the level and component tag) to improve console readability.",
+            "env_variable": "TRIM_LOG_SPACES",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "boolean"
+            ],
+            "sort": 19
+        },
+        {
             "name": "Maximum Backups",
             "description": "The maximum number of backups to keep. When this limit is reached, the oldest backups will be deleted automatically.",
             "env_variable": "MAXIMUM_BACKUPS",

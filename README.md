@@ -121,6 +121,7 @@ The following options can be configured:
 | `Persistent Authentication` | Enables caching of authentication tokens. This prevents the need to re-authenticate via the web browser on every server restart. | `ENABLED` |
 | `Memory overhead` | The amount of RAM (in MB) kept aside for the system so the server doesn’t use everything. Java will get the rest. | `0` |
 | `Logger Level` | Sets the logging level for specific components. Use a comma-separated list in the format LoggerName:LEVEL (for example, com.example:INFO) to control how much detail is logged. | `empty` |
+| `Trim Log Padding` | Collapses excessive spacing in log lines (for example between the level and component tag) to improve console readability. | `false` |
 | `Source Query Support` | Automatically installs the Hytale Source Query plugin, allowing external services to query server status. | `false` |
 | `Validate Assets` | Causes the server to exit with an error code if assets are invalid. Leave empty to skip validation. | `false` |
 | `Validate prefabs` | Forces the server to stop and exit with an error if any specified prefab types are invalid. Provide a comma-separated list of prefab categories (e.g. PHYSICS,BLOCKS,BLOCK_STATES,ENTITIES,BLOCK_FILLER) to check. Leave empty to skip validation. | `0` |

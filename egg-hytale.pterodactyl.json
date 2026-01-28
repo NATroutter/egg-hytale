@@ -211,6 +211,16 @@
             "field_type": "text"
         },
         {
+            "name": "Trim Log Padding",
+            "description": "Collapses excessive spacing in log lines (for example between the level and component tag) to improve console readability.",
+            "env_variable": "TRIM_LOG_SPACES",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
             "name": "Require Valid World Generation",
             "description": "Causes the server to exit with an error code if world gen is invalid.",
             "env_variable": "VALIDATE_WORLD_GENERATION",
