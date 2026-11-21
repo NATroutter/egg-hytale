@@ -1,4 +1,5 @@
-FROM --platform=$TARGETOS/$TARGETARCH eclipse-temurin:25.0.2_10-jre-noble
+FROM --platform=$TARGETOS/$TARGETARCH eclipse-temurin:25.0.5.1_2-jre-noble
+#FROM --platform=$TARGETOS/$TARGETARCH eclipse-temurin:25.0.2_10-jre-noble
 
 # Metadata
 LABEL author="NATroutter" maintainer="contact@natroutter.fi"
