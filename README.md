@@ -152,6 +152,12 @@ Authorization code: XXXXXXXX
 
 This authentication step is only required during initial setup. Subsequent server starts will not require re-authentication.
 
+> [!TIP]
+> ## Don't want to host it yourself?
+> Prefer managed hosting instead of setting up and maintaining your own server? You can run a managed Hytale server with [Supercraft](https://supercraft.host/hytale-server-hosting/?fpr=natroutter-24870a).
+> 
+> *Affiliate disclosure: I may earn a commission if you purchase hosting through this link, at no additional cost to you.*
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
